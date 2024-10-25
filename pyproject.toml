@@ -14,16 +14,13 @@ django-mptt = "^0.16.0"
 django-filter = "^24.3"
 flake8 = "^7.1.1"
 drf-spectacular = "^0.27.2"
-startapp = "^0.2.0.0"
-shops = "^0.0.3"
-rest-framework-simplejwt = "^0.0.2"
 celery = {extras = ["redis"], version = "^5.4.0"}
-django-celery-results = "^2.5.1"
 django-ckeditor-5 = "^0.2.14"
 python-dotenv = "^1.0.1"
 redis = "^5.1.1"
-python-redis = "^0.4.0"
-
+faker = "^30.6.0"
+djangorestframework-simplejwt = "^5.3.1"
+django-jsonform = "^2.23.1"
 
 
 [build-system]

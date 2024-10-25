@@ -1,11 +1,62 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField, EmailField
-from rest_framework.serializers import ModelSerializer, Serializer
+from rest_framework.fields import HiddenField, CurrentUserDefault, CharField, EmailField, IntegerField, BooleanField
+from rest_framework.serializers import Serializer, ModelSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from users.models import User
+from users.models import User, Address, Country, Author
+
+
+class AuthorModelSerializer(ModelSerializer):
+    class Meta:
+        model = Author
+        exclude = 'description',
+
+
+class CountryModelSerializer(ModelSerializer):
+    class Meta:
+        model = Country
+        exclude = ()
+
+
+class AddressListModelSerializer(ModelSerializer):
+    user = HiddenField(default=CurrentUserDefault())
+    postal_code = IntegerField(default=123400, min_value=0)
+    address_line_1 = BooleanField(write_only=True)
+    address_line_2 = BooleanField(write_only=True)
+
+    class Meta:
+        model = Address
+        exclude = ()
+
+    def create(self, validated_data):
+        _has_billing_address = validated_data.pop('has_billing_address')
+        _has_shipping_address = validated_data.pop('has_shipping_address')
+
+        _address = super().create(validated_data)
+        _user: User = _address.user
+        if _user.address_set.count() < 2:
+            _user.billing_address = _address
+            _user.shipping_address = _address
+            _user.save()
+
+        if _has_billing_address:
+            _user.billing_address = _address
+            _user.save()
+
+        if _has_shipping_address:
+            _user.shipping_address = _address
+            _user.save()
+
+        return _address
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        repr['country'] = CountryModelSerializer(instance.country).data
+        repr['has_billing_address'] = instance.user.billing_address_id == instance.id
+        repr['has_shipping_address'] = instance.user.shipping_address_id == instance.id
+        return repr
 
 
 class UserModelSerializer(ModelSerializer):
@@ -25,18 +76,15 @@ class UserUpdateSerializer(ModelSerializer):
         }
 
     def validate(self, data):
-        # Password va confirm_password ni tekshirish
         if data['password'] != data['confirm_password']:
             raise ValidationError("Passwords do not match.")
         return data
 
     def update(self, instance, validated_data):
-        # Parolni yangilash
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
             validated_data.pop('confirm_password', None)
 
-        # Boshqa ma'lumotlarni yangilash
         instance.email = validated_data.get('email', instance.email)
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.save()
@@ -54,7 +102,7 @@ class RegisterUserModelSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = 'id', 'email', 'password', 'confirm_password', 'first_name',
+        fields = 'id', 'email', 'password', 'confirm_password', 'name',
 
         extra_kwargs = {
             'password': {'write_only': True}
@@ -78,7 +126,7 @@ class LoginUserModelSerializer(Serializer):
         user = authenticate(username=email, password=password)
         if user is None:
             raise ValidationError("Invalid email or password")
-        attrs['user'] = user
+        attrs['user.json'] = user
         return attrs
 
 
@@ -88,3 +136,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['email'] = user.email
         return token
+

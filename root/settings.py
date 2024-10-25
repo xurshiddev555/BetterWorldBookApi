@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.append(os.path.join(BASE_DIR, 'apps'))  # todo when your project have more apps
+sys.path.append(os.path.join(BASE_DIR, 'apps'))
 
-SECRET_KEY = 'SECRET_KEY'
+SECRET_KEY = 'django-insecure-0r$f4sw!-+zo=9zwbtj8#@en_$-bi_r9=6r&msuom2$w@^k9=i'
 
 DEBUG = True
 
@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # My Apps
+    'shared',
     'users',
     'shops',
 
@@ -33,8 +34,7 @@ INSTALLED_APPS = [
     'mptt',
     'django_ckeditor_5',
     'rest_framework_simplejwt',
-    'django_celery_results',
-
+    'django_jsonform'
 ]
 
 MIDDLEWARE = [
@@ -93,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
@@ -151,10 +151,14 @@ CKEDITOR_5_CONFIGS = {
             '|',
             'blockQuote',
         ],
-        'toolbar': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
-                    'code', 'subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'insertImage',
-                    'bulletedList', 'numberedList', 'todoList', '|', 'blockQuote', 'imageUpload', '|',
-                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed', 'removeFormat',
+        'toolbar': ['heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline',
+                    'strikethrough',
+                    'code', 'subscript', 'superscript', 'highlight', '|', 'codeBlock',
+                    'sourceEditing', 'insertImage',
+                    'bulletedList', 'numberedList', 'todoList', '|', 'blockQuote', 'imageUpload',
+                    '|',
+                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'mediaEmbed',
+                    'removeFormat',
                     'insertTable', ],
         'image': {
             'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
@@ -183,9 +187,12 @@ CKEDITOR_5_CONFIGS = {
         'heading': {
             'options': [
                 {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
-                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
-                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
-                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'}
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1',
+                 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2',
+                 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3',
+                 'class': 'ck-heading_heading3'}
             ]
         }
     },
@@ -196,6 +203,9 @@ CKEDITOR_5_CONFIGS = {
             'reversed': 'true',
         }
     }
+}
+DJANGO_JSONFORM = {
+    'FILE_HANDLER': ''
 }
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -215,6 +225,5 @@ EMAIL_HOST_USER = 'xurshiddev555@gmail.com'
 EMAIL_HOST_PASSWORD = 'hello world'
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-# CELERY_RESULT_BACKEND = 'django-db'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_CACHE_BACKEND = 'default'

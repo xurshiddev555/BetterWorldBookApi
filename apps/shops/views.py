@@ -1,9 +1,21 @@
+from celery.bin.control import status
 from drf_spectacular.utils import extend_schema
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from shops.models import Address, Country
-from shops.serializers import AddressModelSerializer, CountryModelSerializer
+from shared.paginations import CustomPageNumberPagination
+from shops.models import Book
+from users.models import Address, Country
+from shops.serializers import AddressModelSerializer, CountryModelSerializer, \
+    BookListModelSerializer, BookDetailModelSerializer
+
+
+@extend_schema(tags=['shops'])
+class BookListAPIView(ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookListModelSerializer
+    pagination_class = CustomPageNumberPagination
 
 
 @extend_schema(tags=['users'])
@@ -23,14 +35,10 @@ class CountryListAPIView(ListAPIView):
     authentication_classes = ()
 
 
-from rest_framework import generics, permissions, status
-from rest_framework.response import Response
-from .models import Address
-from .serializers import AddressModelSerializer
 
-class AddressListCreateView(generics.ListCreateAPIView):
+class AddressListCreateView(ListCreateAPIView):
     serializer_class = AddressModelSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Address.objects.filter(user=self.request.user).order_by('-is_default_shipping', '-is_default_billing', 'name')
@@ -38,9 +46,9 @@ class AddressListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class AddressUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+class AddressUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     serializer_class = AddressModelSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     lookup_field = 'id'
 
     def get_queryset(self):
